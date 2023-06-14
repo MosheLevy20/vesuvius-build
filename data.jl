@@ -67,10 +67,10 @@ const GRID_SIZE = 500  # The size of each cell.
   GRID_SIZE*(j - 1) + 1 : min(GRID_SIZE*j, max)
 
 @inline grid_cell_filename(scan::HerculaneumScan, jy::Int, jx::Int, jz::Int)::String =
-  "cell_yxz_$(zpad(jy, 3))_$(zpad(jx, 3))_$(zpad(jz, 3)).tif"
+  "cell_yxz_$(zpad(jy, 3))_$(zpad(jx, 3))_$(zpad(jz, 5)).tif"
 
 @inline grid_cell_server_path(scan::HerculaneumScan, jy::Int, jx::Int, jz::Int)::String = begin
-  path = replace(scan.path, "/volumes/" => "/volume_grids/")
+  path = replace(scan.path, "/volumes/" => "/volume_tiles/")
   "$path/$(grid_cell_filename(scan, jy, jx, jz))"
 end
 

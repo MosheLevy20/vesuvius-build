@@ -31,7 +31,8 @@ end
 
 
 load_grid_cells_from_slices!(cells::Array{Gray{N0f16}, 5}, scan::HerculaneumScan, jys::UnitRange{Int}, jxs::UnitRange{Int}, jz::Int) = begin
-  izs = grid_cell_range(jz, scan.slices)
+  # izs = grid_cell_range(jz, scan.slices)
+  izs = jz : min(jz+1, max)
   black = Gray{N0f16}(0)
   for (cell_iz, iz) in enumerate(izs)
     slice_path = scan_slice_path(scan, iz)

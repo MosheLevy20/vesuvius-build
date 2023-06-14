@@ -18,16 +18,17 @@ save_grid_cells(scan::HerculaneumScan, cells::AbstractArray{Gray{N0f16},5}, jys:
 end
 
 load_grid_cell_from_slices(scan::HerculaneumScan, jy::Int, jx::Int, jz::Int) = begin
-  cell = zeros(Gray{N0f16}, (GRID_SIZE, GRID_SIZE, GRID_SIZE))
+  cell = zeros(Gray{N0f16}, (GRID_SIZE, GRID_SIZE, 1))  # Only one slice in Z dimension now
   izs = grid_cell_range(jz, scan.slices)
   iys = grid_cell_range(jy, scan.height)
   ixs = grid_cell_range(jx, scan.width)
   for (cell_iz, iz) in enumerate(izs)
     slice = TiffImages.load(scan_slice_path(scan, iz); mmap=true)
-    cell[1:length(iys), 1:length(ixs), cell_iz] = @view slice[iys, ixs]
+    cell[1:length(iys), 1:length(ixs), 1] = @view slice[iys, ixs]  # Only one slice in Z dimension now
   end
   cell
 end
+
 
 load_grid_cells_from_slices!(cells::Array{Gray{N0f16}, 5}, scan::HerculaneumScan, jys::UnitRange{Int}, jxs::UnitRange{Int}, jz::Int) = begin
   izs = grid_cell_range(jz, scan.slices)
@@ -39,21 +40,22 @@ load_grid_cells_from_slices!(cells::Array{Gray{N0f16}, 5}, scan::HerculaneumScan
     for jy in jys, jx in jxs
       iys = grid_cell_range(jy, scan.height)
       ixs = grid_cell_range(jx, scan.width)
-      cells[1:length(iys), 1:length(ixs), cell_iz, jy - jys.start + 1, jx - jxs.start + 1] = @view slice[iys, ixs]
-      cells[length(iys)+1:end, 1:length(ixs), cell_iz, jy - jys.start + 1, jx - jxs.start + 1] .= black
-      cells[:, length(ixs)+1:end, cell_iz, jy - jys.start + 1, jx - jxs.start + 1] .= black
+      cells[1:length(iys), 1:length(ixs), 1, jy - jys.start + 1, jx - jxs.start + 1] = @view slice[iys, ixs]  # Only one slice in Z dimension now
+      cells[length(iys)+1:end, 1:length(ixs), 1, jy - jys.start + 1, jx - jxs.start + 1] .= black  # Only one slice in Z dimension now
+      cells[:, length(ixs)+1:end, 1, jy - jys.start + 1, jx - jxs.start + 1] .= black  # Only one slice in Z dimension now
     end
   end
   nothing
 end
 
+
 build_grid_layer(scan::HerculaneumScan, jz::Int) = begin
   Base.GC.gc()
   println("GC done.")
   sy, sx = 4, 4
-  cells = Array{Gray{N0f16}}(undef, (GRID_SIZE, GRID_SIZE, GRID_SIZE, sy, sx))
+  cells = Array{Gray{N0f16}}(undef, (GRID_SIZE, GRID_SIZE, 1, sy, sx))  # Only one slice in Z dimension now
   println("Cells allocated.")
-  cy, cx, cz = grid_size(scan)
+  cy, cx, _ = grid_size(scan)  # cz no longer needed
   for jy in 1:sy:cy
     for jx in 1:sx:cx
       by, bx = jy:min(jy+sy-1, cy), jx:min(jx+sx-1, cx)
@@ -68,3 +70,4 @@ build_grid_layer(scan::HerculaneumScan, jz::Int) = begin
   end
   nothing
 end
+

@@ -58,7 +58,7 @@ const GRID_SIZE = 500  # The size of each cell.
 @inline grid_size(scan::HerculaneumScan) =
   ( ceil(Int, scan.height / GRID_SIZE),
     ceil(Int, scan.width / GRID_SIZE),
-    ceil(Int, scan.slices / GRID_SIZE) )
+    1 )  # Only one slice in Z dimension now
 
 @inline grid_size(scan::HerculaneumScan, dim::Int) =
   grid_size(scan)[dim]
